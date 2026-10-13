@@ -1,1 +1,460 @@
-PLACEHOLDER_WILL_FAIL
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>РУСЬ — Открытый мир России</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0a0a0a;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at center, #1a1a1a 0%, #050505 100%);
+  }
+  .screen.active { display: flex; }
+  
+  /* Splash Logo */
+  #splash .logo-wrap {
+    text-align: center;
+    animation: logoIn 2s ease-out;
+  }
+  #splash .bear {
+    font-size: 140px;
+    filter: drop-shadow(0 0 30px rgba(180,80,0,0.5));
+    margin-bottom: -20px;
+  }
+  #splash .title {
+    font-size: 96px;
+    font-weight: 900;
+    letter-spacing: 8px;
+    background: linear-gradient(180deg, #ddd 0%, #888 50%, #555 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 40px rgba(200,0,0,0.3);
+    position: relative;
+  }
+  #splash .star {
+    color: #c00;
+    font-size: 36px;
+    margin-top: 10px;
+  }
+  @keyframes logoIn {
+    from { opacity: 0; transform: scale(0.7); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  
+  /* Loading */
+  #loading .fox {
+    font-size: 120px;
+    animation: spinBall 1.2s linear infinite;
+    margin-bottom: 40px;
+  }
+  @keyframes spinBall {
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(0.85); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+  #loading .run {
+    animation: run 0.6s ease-in-out infinite alternate;
+  }
+  @keyframes run {
+    from { transform: translateX(-30px); }
+    to { transform: translateX(30px); }
+  }
+  .progress {
+    width: 320px;
+    height: 10px;
+    background: #222;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-top: 20px;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #8b0000, #ff3333);
+    width: 0%;
+    transition: width 0.25s;
+  }
+  #loading-text {
+    margin-top: 24px;
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: #aaa;
+  }
+  
+  /* Goose */
+  #goose-full {
+    font-size: 220px;
+    transition: all 0.9s cubic-bezier(0.4,0,0.2,1);
+    position: absolute;
+  }
+  #goose-full.small {
+    font-size: 70px;
+    bottom: 50px;
+    left: 50px;
+    top: auto;
+  }
+  #dialogue {
+    max-width: 720px;
+    background: rgba(15,15,15,0.97);
+    border: 2px solid #8b0000;
+    border-radius: 16px;
+    padding: 32px;
+    margin-top: 80px;
+    font-size: 18px;
+    line-height: 1.65;
+    display: none;
+    box-shadow: 0 0 40px rgba(139,0,0,0.35);
+  }
+  #dialogue p { margin-bottom: 14px; }
+  #next-btn {
+    margin-top: 24px;
+    padding: 14px 48px;
+    background: #8b0000;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 17px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  #next-btn:hover { background: #a00; transform: scale(1.03); }
+  
+  /* Create */
+  #create {
+    overflow-y: auto;
+    padding: 40px 20px;
+    justify-content: flex-start;
+  }
+  #create h1 {
+    font-size: 52px;
+    margin: 20px 0 10px;
+    letter-spacing: 6px;
+    background: linear-gradient(180deg,#eee,#888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .section {
+    background: rgba(25,25,25,0.95);
+    border: 1px solid #333;
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 22px;
+    width: 100%;
+    max-width: 620px;
+  }
+  .section h2 {
+    color: #ff5555;
+    margin-bottom: 16px;
+    font-size: 19px;
+  }
+  .options {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .option {
+    padding: 12px 18px;
+    background: #1a1a1a;
+    border: 2px solid #3a3a3a;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 15px;
+  }
+  .option:hover, .option.selected {
+    border-color: #c00;
+    background: #2a0a0a;
+    transform: scale(1.04);
+  }
+  .color-opt {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 3px solid #444;
+    padding: 0;
+  }
+  .color-opt.selected { border-color: #fff; box-shadow: 0 0 12px #c00; }
+  
+  #start-btn {
+    margin: 30px 0 80px;
+    padding: 20px 70px;
+    background: linear-gradient(135deg, #8b0000, #cc0000);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 40px rgba(200,0,0,0.45);
+    transition: transform 0.2s;
+    letter-spacing: 2px;
+  }
+  #start-btn:hover { transform: scale(1.06); }
+  
+  /* Game */
+  #game {
+    background: linear-gradient(#122212, #0a120a);
+  }
+  #game-ui {
+    position: absolute;
+    bottom: 28px;
+    left: 28px;
+    right: 28px;
+    background: rgba(0,0,0,0.88);
+    border: 1px solid #8b0000;
+    border-radius: 14px;
+    padding: 18px 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .hud-item { font-size: 14px; color: #bbb; }
+  .hud-item span { color: #ff6666; font-weight: bold; }
+</style>
+</head>
+<body>
+
+<div id="splash" class="screen active">
+  <div class="logo-wrap">
+    <div class="bear">🐻</div>
+    <div class="title">РУСЬ</div>
+    <div class="star">★</div>
+  </div>
+</div>
+
+<div id="loading" class="screen">
+  <div class="fox" id="fox">🦊</div>
+  <div class="progress"><div class="progress-bar" id="bar"></div></div>
+  <div id="loading-text">Загрузка мира России...</div>
+</div>
+
+<div id="goose-screen" class="screen">
+  <div id="goose-full">🦢</div>
+  <div id="dialogue">
+    <p id="dialogue-text"></p>
+    <button id="next-btn">Далее →</button>
+  </div>
+</div>
+
+<div id="create" class="screen">
+  <h1>РУСЬ</h1>
+  <p style="margin-bottom:28px;color:#999;font-size:16px;">Создай своего персонажа</p>
+  
+  <div class="section">
+    <h2>Цвет кожи</h2>
+    <div class="options" id="skin">
+      <div class="option color-opt selected" style="background:#f5d0b5" data-val="светлый"></div>
+      <div class="option color-opt" style="background:#e0b090" data-val="средний"></div>
+      <div class="option color-opt" style="background:#c68642" data-val="смуглый"></div>
+      <div class="option color-opt" style="background:#8d5524" data-val="тёмный"></div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>Цвет глаз</h2>
+    <div class="options" id="eyes">
+      <div class="option color-opt selected" style="background:#4a90d9" data-val="голубые"></div>
+      <div class="option color-opt" style="background:#3d5c2e" data-val="зелёные"></div>
+      <div class="option color-opt" style="background:#8b4513" data-val="карие"></div>
+      <div class="option color-opt" style="background:#111" data-val="чёрные"></div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>Помощник (животное или техника)</h2>
+    <div class="options" id="pet">
+      <div class="option selected" data-val="гусь">🦢 Гусь (голос + полёт)</div>
+      <div class="option" data-val="медведь">🐻 Медведь (сила)</div>
+      <div class="option" data-val="лиса">🦊 Лиса (ремонт)</div>
+      <div class="option" data-val="тигр">🐅 Тигр</div>
+      <div class="option" data-val="лев">🦁 Лев</div>
+      <div class="option" data-val="попугай">🦜 Попугай (камера + полёт)</div>
+      <div class="option" data-val="дрон">🛸 Дрон DJI</div>
+      <div class="option" data-val="робот">🤖 Робот</div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <h2>Рюкзак</h2>
+    <div class="options" id="backpack">
+      <div class="option selected" data-val="обычный">Обычный</div>
+      <div class="option" data-val="3d">3D-принтер (Bambu Lab)</div>
+      <div class="option" data-val="колонка">Колонка</div>
+      <div class="option" data-val="полиция">Полицейский (дроны, без ареста)</div>
+      <div class="option" data-val="спецназ">Спецназ (ракеты + дроны)</div>
+    </div>
+  </div>
+  
+  <button id="start-btn">ВОЙТИ В РУСЬ</button>
+</div>
+
+<div id="game" class="screen">
+  <div style="text-align:center;padding-top:18vh;">
+    <div style="font-size:64px;margin-bottom:10px;">🐻</div>
+    <h1 style="font-size:56px;letter-spacing:8px;margin-bottom:24px;">РУСЬ</h1>
+    <p style="font-size:20px;color:#aaa;max-width:620px;margin:0 auto 40px;line-height:1.6;">
+      Открытый мир России загружен.<br>
+      Более <b style="color:#ff6666">миллиона миссий</b>. Полная свобода.<br>
+      Графика уровня GTA V / GTA VI.<br>
+      Всё на русском. Всё бесплатно.
+    </p>
+    <p style="color:#666;font-size:14px;">Прототип сайта-игры. Полная версия в разработке.</p>
+  </div>
+  <div id="game-ui">
+    <div class="hud-item">Помощник: <span id="hud-pet">Гусь</span></div>
+    <div class="hud-item">Рюкзак: <span id="hud-bp">Обычный</span></div>
+    <div class="hud-item">Голос: <span id="hud-voice">Гусь</span></div>
+    <div class="hud-item">Миссии: <span>1 000 000+</span></div>
+  </div>
+</div>
+
+<script>
+const screens = ['splash','loading','goose-screen','create','game'];
+function show(id) {
+  screens.forEach(s => document.getElementById(s).classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// Splash → Loading
+setTimeout(() => {
+  show('loading');
+  startLoading();
+}, 3800);
+
+function startLoading() {
+  let p = 0;
+  const bar = document.getElementById('bar');
+  const fox = document.getElementById('fox');
+  const texts = [
+    'Загрузка мира России...',
+    'Создание городов и дорог...',
+    'Загрузка поездов и самолётов...',
+    'Подготовка миллиона миссий...',
+    'Активация животных и техники...',
+    'Почти готово...'
+  ];
+  let t = 0;
+  const interval = setInterval(() => {
+    p += Math.random() * 11 + 5;
+    if (p > 100) p = 100;
+    bar.style.width = p + '%';
+    if (p > 25 && p < 75) {
+      fox.classList.add('run');
+      fox.classList.remove('fox');
+    } else {
+      fox.classList.remove('run');
+      fox.classList.add('fox');
+    }
+    if (Math.floor(p / 18) > t && t < texts.length - 1) {
+      t++;
+      document.getElementById('loading-text').textContent = texts[t];
+    }
+    if (p >= 100) {
+      clearInterval(interval);
+      setTimeout(() => {
+        show('goose-screen');
+        startGoose();
+      }, 700);
+    }
+  }, 180);
+}
+
+const dialogues = [
+  `Привет! Я <b>Гусь</b> — главный в команде РУСЬ.<br>Я буду объяснять тебе, как здесь всё работает.`,
+  `В этой игре ты создаёшь своего персонажа с нуля:<br>цвет кожи, цвет глаз, внешность — всё на твой вкус.`,
+  `Можешь выбрать помощника:<br>
+• <b>Гусь</b> — я буду твоим голосовым помощником и ты сможешь на мне летать<br>
+• <b>Медведь</b> — суперсилы силы<br>
+• <b>Лиса</b> — чинит всё, что сломалось<br>
+• Тигр, Лев, Попугай (быстрый полёт + камера)<br>
+• Или технику: дрон <b>DJI</b> или робота`,
+  `Рюкзаки:<br>
+• Обычный<br>
+• <b>3D-принтер Bambu Lab</b> — печатай что угодно прямо на ходу<br>
+• Колонка<br>
+• <b>Полицейский</b> — дроны, тебя не арестуют, станешь военным<br>
+• <b>Спецназ</b> — ракеты, дроны и многое другое`,
+  `Голосовой помощник:<br>
+Если выбрал Гуся — я твой голос.<br>
+Если нет — будет <b>Алиса</b>.`,
+  `Техника: Apple, дроны DJI, принтеры Bambu Lab.<br>
+Весь мир — настоящая <b>Россия</b>.<br>
+Поезда, самолёты, автомобили — всё, что есть в жизни.<br>
+Более <b>миллиона миссий</b>.<br>
+Всё бесплатно. Всё на русском.<br>
+Графика уровня GTA V и GTA VI.`,
+  `Готов создать персонажа и войти в <b>РУСЬ</b>?`
+];
+
+let dIndex = 0;
+const dialogueEl = document.getElementById('dialogue');
+const textEl = document.getElementById('dialogue-text');
+const goose = document.getElementById('goose-full');
+
+function startGoose() {
+  setTimeout(() => {
+    goose.classList.add('small');
+    dialogueEl.style.display = 'block';
+    showDialogue();
+  }, 1300);
+}
+
+function showDialogue() {
+  textEl.innerHTML = dialogues[dIndex];
+}
+
+document.getElementById('next-btn').onclick = () => {
+  dIndex++;
+  if (dIndex < dialogues.length) {
+    showDialogue();
+  } else {
+    show('create');
+  }
+};
+
+document.querySelectorAll('.options').forEach(group => {
+  group.querySelectorAll('.option').forEach(opt => {
+    opt.onclick = () => {
+      group.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      opt.classList.add('selected');
+    };
+  });
+});
+
+document.getElementById('start-btn').onclick = () => {
+  const pet = document.querySelector('#pet .selected').dataset.val;
+  const bp = document.querySelector('#backpack .selected').dataset.val;
+  
+  const petNames = {
+    'гусь':'Гусь','медведь':'Медведь','лиса':'Лиса','тигр':'Тигр',
+    'лев':'Лев','попугай':'Попугай','дрон':'Дрон DJI','робот':'Робот'
+  };
+  const bpNames = {
+    'обычный':'Обычный','3d':'3D-принтер Bambu Lab','колонка':'Колонка',
+    'полиция':'Полицейский','спецназ':'Спецназ'
+  };
+  
+  document.getElementById('hud-pet').textContent = petNames[pet] || pet;
+  document.getElementById('hud-bp').textContent = bpNames[bp] || bp;
+  document.getElementById('hud-voice').textContent = (pet === 'гусь') ? 'Гусь' : 'Алиса';
+  
+  show('game');
+};
+</script>
+</body>
+</html>
